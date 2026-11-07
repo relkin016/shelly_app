@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shelly</title>
+  <meta name="description" content="Приложение для умной розетки Shelly на Android: включение, мощность, напряжение, ток, расход энергии, таймер и уведомления. Локальная сеть, без облака.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%232A5EA8'/%3E%3Cpath fill='white' d='M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-4 8.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm8 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      --bg: #f8f9ff; --surface: #ffffff; --surface2: #ededf4; --text: #191c20; --muted: #43474e;
+      --primary: #2a5ea8; --on-primary: #ffffff; --primary-c: #d6e3ff; --on-primary-c: #001b3e; --line: #dfe2eb;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #111318; --surface: #191c20; --surface2: #282a2f; --text: #e2e2e9; --muted: #c4c6d0;
+        --primary: #a9c7ff; --on-primary: #003064; --primary-c: #00468c; --on-primary-c: #d6e3ff; --line: #43474e;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #111318; --surface: #191c20; --surface2: #282a2f; --text: #e2e2e9; --muted: #c4c6d0;
+        --primary: #a9c7ff; --on-primary: #003064; --primary-c: #00468c; --on-primary-c: #d6e3ff; --line: #43474e;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    .wrap { max-width: 880px; margin: 0 auto; padding: 0 16px; }
+    header { padding: 20px 0; display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 20px; }
+    .logo { width: 40px; height: 40px; border-radius: 12px; background: var(--primary); display: grid; place-items: center; }
+    .logo svg { width: 24px; height: 24px; fill: var(--on-primary); }
+    h1 { font-size: clamp(28px, 6vw, 44px); line-height: 1.15; margin: 24px 0 12px; }
+    .lead { color: var(--muted); font-size: 18px; max-width: 640px; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 20px; margin: 16px 0; }
+    .release { background: var(--primary-c); color: var(--on-primary-c); border: 0; }
+    .btn { display: inline-block; padding: 12px 22px; border-radius: 999px; background: var(--primary); color: var(--on-primary); text-decoration: none; font-weight: 600; }
+    .btn.ghost { background: transparent; color: inherit; border: 1px solid currentColor; }
+    .meta { font-size: 14px; opacity: .85; margin-top: 8px; }
+    code { font: 12px/1.4 ui-monospace, monospace; word-break: break-all; display: block; background: var(--surface2); color: var(--text); padding: 8px 10px; border-radius: 10px; margin-top: 8px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+    .grid .card { margin: 0; }
+    h2 { margin-top: 40px; }
+    h3 { margin: 0 0 6px; font-size: 17px; }
+    .grid p { margin: 0; color: var(--muted); }
+    footer { color: var(--muted); font-size: 14px; padding: 40px 0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-4 8.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm8 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/></svg></div>
+      Shelly
+    </header>
+
+    <h1>Умная розетка Shelly — в телефоне</h1>
+    <p class="lead">Включение одной кнопкой, мощность в реальном времени, напряжение, ток и расход энергии с ценой.
+      Вход по IP и паролю — напрямую по локальной сети, без облака и аккаунта.</p>
+
+    <div class="card release" id="current">
+      <div>Загружаю информацию о версии…</div>
+    </div>
+    <div class="card" id="previous" hidden></div>
+
+    <h2>Возможности</h2>
+    <div class="grid">
+      <div class="card"><h3>Вход по IP + паролю</h3><p>Пароль можно запомнить — он хранится зашифрованным ключом Android Keystore. Несколько розеток, переключение в один тап.</p></div>
+      <div class="card"><h3>Метрики вживую</h3><p>Мощность, напряжение, ток, частота, температура, Wi‑Fi. График мощности за 5 минут, 15 минут или час.</p></div>
+      <div class="card"><h3>Расход и стоимость</h3><p>Энергия за сегодня, за сеанс и по счётчику розетки — в кВт·ч и в деньгах по вашему тарифу.</p></div>
+      <div class="card"><h3>Таймер и защита</h3><p>Выключить или включить через N минут, состояние после подачи питания, лимит мощности, автовыключение.</p></div>
+      <div class="card"><h3>Уведомления</h3><p>Высокая мощность, нагрузка закончила работу, авария, переключение, потеря связи — каждое: выкл, уведомление или будильник.</p></div>
+      <div class="card"><h3>Material You</h3><p>Цвета из обоев, светлая, тёмная и AMOLED-тема. Gen1, Plus и Gen3/Gen4. Демо-режим без розетки.</p></div>
+    </div>
+
+    <footer>Android 12+ · APK подписан, сверяйте SHA-256 перед установкой.</footer>
+  </div>
+  <script>
+    const fmtSize = b => (b / 1048576).toFixed(1).replace('.', ',') + ' МБ';
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    function block(r, title, primary) {
+      return `<div style="font-size:14px;opacity:.85">${title}</div>
+        <div style="font-size:28px;font-weight:700;margin:4px 0 12px">Версия ${esc(r.version)}</div>
+        <a class="btn${primary ? '' : ' ghost'}" href="${esc(r.url)}" rel="noopener">Скачать APK</a>
+        <div class="meta">${esc(r.file)} · ${fmtSize(r.size)} · ${esc(r.date)} · Android ${esc(r.minAndroid)}+</div>
+        <code>SHA-256: ${esc(r.sha256)}</code>`;
+    }
+    fetch('release.json', {cache: 'no-store'}).then(r => r.json()).then(r => {
+      document.getElementById('current').innerHTML = block(r, 'Текущая версия', true);
+      if (r.previous) {
+        const p = document.getElementById('previous');
+        p.innerHTML = block(r.previous, 'Предыдущая версия — для отката', false);
+        p.hidden = false;
+      }
+    }).catch(() => {
+      document.getElementById('current').textContent = 'Не удалось загрузить release.json';
+    });
+  </script>
+</body>
+</html>
