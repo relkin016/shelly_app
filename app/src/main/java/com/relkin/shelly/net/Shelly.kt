@@ -172,9 +172,10 @@ class Gen2Client(host: String, password: String?, override val info: DeviceInfo)
             val errs = sw.optJSONArray("errors")
             return PlugStatus(
                 on = sw.optBoolean("output"),
-                powerW = sw.optDoubleOrNull("apower"),
+                // Знак зависит от направления тока (перепутаны L/N) — для розетки он не важен.
+                powerW = sw.optDoubleOrNull("apower")?.let(Math::abs),
                 voltageV = sw.optDoubleOrNull("voltage"),
-                currentA = sw.optDoubleOrNull("current"),
+                currentA = sw.optDoubleOrNull("current")?.let(Math::abs),
                 freqHz = sw.optDoubleOrNull("freq"),
                 pf = sw.optDoubleOrNull("pf"),
                 energyWh = sw.optJSONObject("aenergy")?.optDoubleOrNull("total"),
@@ -251,7 +252,7 @@ class Gen1Client(host: String, user: String, password: String?, override val inf
             }
             return PlugStatus(
                 on = relay.optBoolean("ison"),
-                powerW = meter.optDoubleOrNull("power"),
+                powerW = meter.optDoubleOrNull("power")?.let(Math::abs),
                 voltageV = null,
                 currentA = null,
                 freqHz = null,

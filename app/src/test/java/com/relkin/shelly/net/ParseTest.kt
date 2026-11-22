@@ -30,6 +30,15 @@ class ParseTest {
     }
 
     @Test
+    fun negativePowerIsAbsolute() {
+        val g2 = Gen2Client.parseStatus(JSONObject("""{"switch:0":{"output":true,"apower":-57.3,"current":-0.25}}"""))
+        assertEquals(57.3, g2.powerW!!, 1e-9)
+        assertEquals(0.25, g2.currentA!!, 1e-9)
+        val g1 = Gen1Client.parseStatus(JSONObject("""{"meters":[{"power":-12.5}]}"""))
+        assertEquals(12.5, g1.powerW!!, 1e-9)
+    }
+
+    @Test
     fun gen1Status() {
         val j = JSONObject(
             """{"relays":[{"ison":false,"has_timer":true,"timer_remaining":42,"overpower":true}],
